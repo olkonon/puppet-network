@@ -513,7 +513,7 @@ define network::interface (
 
   include ::network
 
-  #validate_re($ensure, '^(present|absent)$', "Ensure can only be present or absent (to add or remove an interface). Current value: ${ensure}")
+  ##validate_re($ensure, '^(present|absent)$', "Ensure can only be present or absent (to add or remove an interface). Current value: ${ensure}")
   #validate_bool($auto)
   #validate_bool($enable)
   #validate_bool($restart_all_nic)
@@ -534,12 +534,12 @@ define network::interface (
   # $subchannels is only valid for zLinux/SystemZ/s390x.
   if $facts['os']['architecture'] == 's390x' {
     #validate_array($subchannels)
-    validate_re($nettype, '^(qeth|lcs|ctc)$', "${name}::\$nettype may be 'qeth', 'lcs' or 'ctc' only and is set to <${nettype}>.")
+    #validate_re($nettype, '^(qeth|lcs|ctc)$', "${name}::\$nettype may be 'qeth', 'lcs' or 'ctc' only and is set to <${nettype}>.")
     # Different parameters required for RHEL6 and RHEL7
     if $facts['os']['release']['major'] =~ /^7|^8/ {
-      validate_string($zlinux_options)
+      #validate_string($zlinux_options)
     } else {
-      validate_re($layer2, '^0|1$', "${name}::\$layer2 must be 1 or 0 and is to <${layer2}>.")
+      #validate_re($layer2, '^0|1$', "${name}::\$layer2 must be 1 or 0 and is to <${layer2}>.")
     }
   }
   #if $::osfamily == 'RedHat' {
