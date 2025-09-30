@@ -226,7 +226,8 @@ class network (
     default         => $config_file_require,
   }
 
-  $manage_hostname = pick($hostname, $::fqdn)
+ 
+  $manage_hostname = pick($hostname, $facts['networking']['fqdn'])
 
   if $package_ensure == 'absent' {
     $config_dir_ensure = absent
