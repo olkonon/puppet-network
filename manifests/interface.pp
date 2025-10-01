@@ -302,14 +302,14 @@ define network::interface (
 
   ## Debian specific
   $manage_order          = '10',
-  $auto                  = true,
+  Boolean $auto          = true,
   $allow_hotplug         = undef,
   $method                = '',
   $family                = 'inet',
   $stanza                = 'iface',
   $address               = '',
   $dns_search            = undef,
-  $dns_nameservers       = undef,
+  Array $dns_nameservers = undef,
   # For method: static
   $metric                = undef,
   $pointopoint           = undef,
@@ -514,7 +514,6 @@ define network::interface (
   include ::network
 
   ##validate_re($ensure, '^(present|absent)$', "Ensure can only be present or absent (to add or remove an interface). Current value: ${ensure}")
-  #validate_bool($auto)
   #validate_bool($enable)
   #validate_bool($restart_all_nic)
 
