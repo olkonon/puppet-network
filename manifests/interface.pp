@@ -309,7 +309,7 @@ define network::interface (
   $stanza                = 'iface',
   $address               = '',
   $dns_search            = undef,
-  Array $dns_nameservers = undef,
+  Array $dns_nameservers = [],
   # For method: static
   $metric                = undef,
   $pointopoint           = undef,
