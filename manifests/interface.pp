@@ -270,7 +270,7 @@
 #
 define network::interface (
 
-  $enable                = true,
+  Boolean $enable        = true,
   $ensure                = 'present',
   $template              = "network/interface/${facts['os']['family']}.erb",
   $options               = undef,
@@ -278,7 +278,7 @@ define network::interface (
   $options_extra_debian  = undef,
   $options_extra_suse    = undef,
   $interface             = $name,
-  $restart_all_nic = $facts['os']['family'] ? {
+  Boolean $restart_all_nic = $facts['os']['family'] ? {
     'RedHat' => $facts['os']['release']['major'] ? {
       '8'     => false,
       default => true,
@@ -348,12 +348,12 @@ define network::interface (
   $additional_networks   = [ ],
 
   # Common ifupdown scripts
-  $up                    = [ ],
-  $pre_up                = [ ],
-  $post_up               = [ ],
-  $down                  = [ ],
-  $pre_down              = [ ],
-  $post_down             = [ ],
+  Array $up              = [ ],
+  Array $pre_up          = [ ],
+  Array $post_up         = [ ],
+  Array $down            = [ ],
+  Array $pre_down        = [ ],
+  Array $post_down       = [ ],
 
   # For virtual routing and forwarding (VRF)
   $vrf                   = undef,
@@ -514,13 +514,7 @@ define network::interface (
   include ::network
 
   ##validate_re($ensure, '^(present|absent)$', "Ensure can only be present or absent (to add or remove an interface). Current value: ${ensure}")
-  #validate_bool($enable)
-  #validate_bool($restart_all_nic)
 
-  #validate_array($up)
-  #validate_array($pre_up)
-  #validate_array($down)
-  #validate_array($pre_down)
   #validate_array($slaves)
   #validate_array($bond_slaves)
   #validate_array($bridge_ports)
