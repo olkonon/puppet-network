@@ -50,30 +50,6 @@
 #   Values applied to all interfaces, if they don't specify a more specific value
 #   themselves.
 #
-# [*routes_hash*]
-#   Hash. Default undef.
-#   The complete routes configuration (nested) hash
-#   If an hash is provided here, network::route defines are declared with:
-#   create_resources("network::route", $routes_hash)
-#
-# [*mroutes_hash*]
-#   Hash. Default undef.
-#   An hash of multiple route to be applied
-#   If an hash is provided here, network::mroute defines are declared with:
-#   create_resources("network::mroute", $mroutes_hash)
-#
-# [*rules_hash*]
-#   Hash. Default undef.
-#   An hash of ip rules to be applied
-#   If an hash is provided here, network::rules defines are declared with:
-#   create_resources("network::rules", $rules_hash)
-#
-# [*tables_hash*]
-#   Hash. Default undef.
-#   An hash of routing tables to be applied
-#   If an hash is provided here, network::routing_table defines are declared with:
-#   create_resources("network::routing_table", $tables_hash)
-#
 # [*confs_hash*]
 #   Hash. Default undef.
 #   An hash of network:::conf defines to apply.
@@ -86,13 +62,9 @@ class network (
 
   $interfaces_hash           = undef,
   $default_interfaces_hash   = {},
-  $routes_hash               = undef,
-  $mroutes_hash              = undef,
-  $rules_hash                = undef,
-  $tables_hash               = undef,
   $confs_hash                = undef,
 
-  $hostname_file_template   = "network/hostname-${::osfamily}.erb",
+  $hostname_file_template   = "network/hostname-${facts['os']['family']}.erb",
 
   # Parameter used only on RedHat family
   $gateway                   = undef,
@@ -154,28 +126,6 @@ class network (
       undef   => $interfaces_hash,
       default => $hiera_interfaces_hash,
     }
-
-    $hiera_routes_hash = hiera_hash('network::routes_hash',undef)
-    $real_routes_hash = $hiera_routes_hash ? {
-      undef   => $routes_hash,
-      default => $hiera_routes_hash,
-    }
-
-    $hiera_mroutes_hash = hiera_hash('network::mroutes_hash',undef)
-    $real_mroutes_hash = $hiera_mroutes_hash ? {
-      undef   => $mroutes_hash,
-      default => $hiera_mroutes_hash,
-    }
-    $hiera_rules_hash = hiera_hash('network::rules_hash',undef)
-    $real_rules_hash = $hiera_rules_hash ? {
-      undef   => $rules_hash,
-      default => $hiera_rules_hash,
-    }
-    $hiera_tables_hash = hiera_hash('network::tables_hash',undef)
-    $real_tables_hash = $hiera_tables_hash ? {
-      undef   => $tables_hash,
-      default => $hiera_tables_hash,
-    }
     $hiera_confs_hash = hiera_hash('network::confs_hash',undef)
     $real_confs_hash = $hiera_confs_hash ? {
       undef   => $confs_hash,
@@ -184,10 +134,6 @@ class network (
   }
   else {
     $real_interfaces_hash = $interfaces_hash
-    $real_routes_hash     = $routes_hash
-    $real_mroutes_hash    = $mroutes_hash
-    $real_rules_hash      = $rules_hash
-    $real_tables_hash     = $tables_hash
     $real_confs_hash      = $confs_hash
   }
 
@@ -226,7 +172,8 @@ class network (
     default         => $config_file_require,
   }
 
-  $manage_hostname = pick($hostname, $::fqdn)
+
+  $manage_hostname = pick($hostname, $facts['networking']['fqdn'])
 
   if $package_ensure == 'absent' {
     $config_dir_ensure = absent
@@ -322,27 +269,11 @@ class network (
     create_resources('network::interface', $real_interfaces_hash, $default_interfaces_hash)
   }
 
-  if $real_routes_hash {
-    create_resources('network::route', $real_routes_hash)
-  }
-
-  if $real_mroutes_hash {
-    create_resources('network::mroute', $real_mroutes_hash)
-  }
-
-  if $real_rules_hash {
-    create_resources('network::rule', $real_rules_hash)
-  }
-
-  if $real_tables_hash {
-    create_resources('network::routing_table', $real_tables_hash)
-  }
-
   if $real_confs_hash {
     create_resources('network::conf', $real_confs_hash)
   }
   # Configure default gateway (On RedHat). Also hostname is set.
-  if $::osfamily == 'RedHat'
+  if $facts['os']['family'] == 'RedHat'
   and ($::network::gateway
   or $::network::hostname) {
     file { '/etc/sysconfig/network':
@@ -353,7 +284,7 @@ class network (
       content => template($network::hostname_file_template),
       notify  => $network::manage_config_file_notify,
     }
-    case $::lsbmajdistrelease {
+    case $facts['os']['distro']['release']['major'] {
       '7','8': {
         exec { 'sethostname':
           command => "/usr/bin/hostnamectl set-hostname ${manage_hostname}",
@@ -365,7 +296,7 @@ class network (
   }
 
   # Configure hostname (On Debian)
-  if $::osfamily == 'Debian'
+  if $facts['os']['family'] == 'Debian'
   and $hostname {
     file { '/etc/hostname':
       ensure  => $config_file_ensure,
@@ -377,7 +308,7 @@ class network (
     }
   }
 
-  if $::osfamily == 'Suse' {
+  if $facts['os']['family'] == 'Suse' {
     if $hostname {
       file { '/etc/HOSTNAME':
         ensure  => $config_file_ensure,
@@ -394,7 +325,7 @@ class network (
     }
   }
 
-  if $::osfamily == 'Solaris' {
+  if $facts['os']['family'] == 'Solaris' {
     if $hostname {
       file { '/etc/nodename':
         ensure  => $config_file_ensure,

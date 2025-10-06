@@ -36,8 +36,8 @@ allow-hotplug <%= @interface %>
 <% if @mtu -%>
     mtu <%= @mtu %>
 <% end -%>
-<% if @dns_nameservers -%>
-    dns-nameservers <%= @dns_nameservers %>
+<% if !@dns_nameservers.empty? -%>
+    dns-nameservers <%= @dns_nameservers.join(" ") %>
 <% end -%>
 <% if @dns_search -%>
     dns-search <%= @dns_search %>
